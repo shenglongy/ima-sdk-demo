@@ -61,7 +61,6 @@ function initializeIMA() {
   adsLoader.requestAds(adsRequest);
 }
 
-
 function adContainerClick(event) {
   console.log("ad container clicked");
   if (videoElement.paused) {
@@ -71,14 +70,15 @@ function adContainerClick(event) {
   }
 }
 
-
 function onAdsManagerLoaded(adsManagerLoadedEvent) {
   // Instantiate the AdsManager from the adsLoader response and pass it the video element
   adsManager = adsManagerLoadedEvent.getAdsManager(videoElement);
   adsManager.addEventListener(google.ima.AdErrorEvent.Type.AD_ERROR, onAdError);
   adsManager.addEventListener(google.ima.AdEvent.Type.CONTENT_PAUSE_REQUESTED, onContentPauseRequested);
   adsManager.addEventListener(google.ima.AdEvent.Type.CONTENT_RESUME_REQUESTED, onContentResumeRequested);
-  adsManager.addEventListener(google.ima.AdEvent.Type.LOADED, onAdLoaded);
+  adsManager.addEventListener(google.ima.AdEvent.Type.LOADED, onAdEvent);
+  adsManager.addEventListener(google.ima.AdEvent.Type.STARTED, onAdEvent);
+  adsManager.addEventListener(google.ima.AdEvent.Type.COMPLETE, onAdEvent);
 }
 
 function onAdError(adErrorEvent) {
@@ -95,13 +95,6 @@ function onContentPauseRequested() {
 
 function onContentResumeRequested() {
   videoElement.play();
-}
-
-function onAdLoaded(adEvent) {
-  var ad = adEvent.getAd();
-  if (!ad.isLinear()) {
-    videoElement.play();
-  }
 }
 
 function loadAds(event) {
@@ -129,5 +122,23 @@ function loadAds(event) {
     // Play the video without ads, if an error occurs
     console.log("AdsManager could not be started");
     videoElement.play();
+  }
+}
+
+function onAdEvent(adEvent) {
+  var ad = adEvent.getAd();
+  switch (adEvent.type) {
+    case google.ima.AdEvent.Type.LOADED:
+      if (!ad.isLinear()) {
+        videoContent.play();
+      }
+    case google.ima.AdEvent.Type.STARTED:
+      console.log("ad start");
+      break;
+    case google.ima.AdEvent.Type.COMPLETE:
+      console.log("ad complete");
+      break;
+    default:
+      break;
   }
 }
